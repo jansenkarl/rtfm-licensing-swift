@@ -12,7 +12,9 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
     var manifestGeneratedAt = "2026-07-29T12:00:00.000Z"
     var seatsUsed = 0
     var mutationsReceived = 0
-    var sequence: Int64 = 0
+    /// Lease sequence per activation or trial, as the real server numbers them.
+    var sequences: [String: Int64] = [:]
+    var activationsCreated = 0
     /// Do the work, then answer as if the connection dropped.
     var loseNextResponse = false
     /// Answer the next mutation with this error instead of doing anything.
@@ -91,7 +93,8 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
         case (false, "activations"):
             guard body["product_key"] as? String == "SYNTH-GOOD-KEY" else { return error(403, "invalid_product_key") }
             seatsUsed += 1
-            let activation = "act_\(seatsUsed)"
+            activationsCreated += 1
+            let activation = "act_\(activationsCreated)"
             credentials[activation] = "cred-\(activation)"
             return (200, ["activation_id": activation, "refresh_credential": credentials[activation]!, "lease": try paidLease(activation, device_)])
         case (false, "leases"):
@@ -114,8 +117,9 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
         ])
     }
 
-    private func claims(_ device: String) -> [String: Any] {
-        sequence += 1
+    private func claims(_ device: String, subject: String) -> [String: Any] {
+        let sequence = (sequences[subject] ?? 0) + 1
+        sequences[subject] = sequence
         return ["kid": activeKid, "iss": "https://synthetic-license.invalid", "tenant_id": "tenant_synthetic_publisher",
                 "product_id": "synthetic-audio", "release_family_id": "synthetic-audio-1", "device_thumbprint": device,
                 "iat": now, "nbf": now, "refresh_after": now + 75 * 86400, "exp": now + 90 * 86400, "grace_until": now + 104 * 86400,
@@ -123,14 +127,14 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
     }
 
     private func paidLease(_ activation: String, _ device: String) throws -> String {
-        var payload = claims(device)
+        var payload = claims(device, subject: activation)
         payload.merge(["schema": "rtfm.license-lease.v1", "license_id": "lic_1", "activation_id": activation, "revocation_epoch": 0]) { $1 }
         if let term { payload["term"] = term }
         return try leaseSigners[activeKid]!.sign(kid: activeKid, type: "rtfm.license-lease.v1+jws", payload: payload)
     }
 
     private func trialLease(_ device: String) throws -> String {
-        var payload = claims(device)
+        var payload = claims(device, subject: "trl_1")
         payload.merge(["schema": "rtfm.trial-lease.v1", "lease_kind": "trial", "trial_id": "trl_1", "trial_revision": 1,
                        "trial_ends_at": "2026-12-31T00:00:00.000Z", "refresh_after": now + 20 * 3600,
                        "exp": now + 24 * 3600, "grace_until": now + 36 * 3600]) { $1 }

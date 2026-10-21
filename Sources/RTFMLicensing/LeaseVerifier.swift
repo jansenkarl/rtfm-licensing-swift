@@ -50,14 +50,19 @@ public enum LeaseVerifier {
         let refreshAfter = try integer("refresh_after"), expiresAt = try integer("exp"), graceUntil = try integer("grace_until")
         guard refreshAfter <= expiresAt, expiresAt <= graceUntil else { throw VerificationError.malformed("lease timing order") }
         let highWater = expectations.highWater
-        guard sequence >= highWater.sequence else { throw VerificationError.staleState("lease sequence") }
         let kind: Lease.Kind
         let typed: Bool
         switch expected {
         case .paid:
             let epoch = try integer("revocation_epoch")
-            guard epoch >= highWater.revocationEpoch else { throw VerificationError.staleState("revocation epoch") }
-            kind = .paid(licenseID: try text("license_id"), activationID: try text("activation_id"), revocationEpoch: epoch)
+            let licenseID = try text("license_id"), activationID = try text("activation_id")
+            if HighWater.applies(highWater.activationID, to: activationID), sequence < highWater.sequence {
+                throw VerificationError.staleState("lease sequence")
+            }
+            if HighWater.applies(highWater.licenseID, to: licenseID), epoch < highWater.revocationEpoch {
+                throw VerificationError.staleState("revocation epoch")
+            }
+            kind = .paid(licenseID: licenseID, activationID: activationID, revocationEpoch: epoch)
             if let revision = claims["entitlement_revision"] {
                 guard revision.safeInteger != nil else { throw VerificationError.malformed("lease entitlement_revision") }
                 typed = true
@@ -67,14 +72,18 @@ public enum LeaseVerifier {
         case .trial:
             guard claims["lease_kind"] == .string("trial") else { throw VerificationError.malformed("trial lease kind") }
             let revision = try integer("trial_revision")
-            guard revision >= highWater.trialRevision else { throw VerificationError.staleState("trial revision") }
+            let trialID = try text("trial_id")
+            if HighWater.applies(highWater.trialID, to: trialID) {
+                guard sequence >= highWater.trialSequence ?? 0 else { throw VerificationError.staleState("lease sequence") }
+                guard revision >= highWater.trialRevision else { throw VerificationError.staleState("trial revision") }
+            }
             guard let endsAt = Timestamp.parse(try text("trial_ends_at")) else {
                 throw VerificationError.malformed("trial_ends_at")
             }
             guard Double(graceUntil) <= endsAt.timeIntervalSince1970 else {
                 throw VerificationError.malformed("trial lease grace exceeds the trial end")
             }
-            kind = .trial(trialID: try text("trial_id"), endsAt: endsAt, revision: revision)
+            kind = .trial(trialID: trialID, endsAt: endsAt, revision: revision)
             typed = false
         }
         return Lease(kind: kind, jws: jws, keyID: kid, sequence: sequence, issuedAt: issuedAt, notBefore: notBefore,

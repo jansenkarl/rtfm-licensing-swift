@@ -99,19 +99,27 @@ enum LicenseStateCoding {
 }
 
 extension LicenseState {
-    /// The state after accepting a verified lease: the lease, and high-water marks raised to it (never lowered).
+    /// The state after accepting a verified lease: the lease, and its high-water marks raised to it (never lowered
+    /// within the same activation, license or trial; a new one starts from its own values).
     func accepting(_ lease: Lease) -> LicenseState {
         var next = self
-        next.highWater.sequence = max(highWater.sequence, lease.sequence)
+        var marks = highWater
         switch lease.kind {
-        case let .paid(_, _, epoch):
+        case let .paid(licenseID, activationID, epoch):
             next.paidLease = lease.jws
-            next.highWater.revocationEpoch = max(highWater.revocationEpoch, epoch)
+            marks.sequence = marks.activationID == activationID ? max(marks.sequence, lease.sequence) : lease.sequence
+            marks.revocationEpoch = marks.licenseID == licenseID ? max(marks.revocationEpoch, epoch) : epoch
+            marks.activationID = activationID
+            marks.licenseID = licenseID
         case let .trial(trialID, _, revision):
             next.trialLease = lease.jws
             next.trialID = trialID
-            next.highWater.trialRevision = max(highWater.trialRevision, revision)
+            let same = marks.trialID == trialID
+            marks.trialSequence = same ? max(marks.trialSequence ?? 0, lease.sequence) : lease.sequence
+            marks.trialRevision = same ? max(marks.trialRevision, revision) : revision
+            marks.trialID = trialID
         }
+        next.highWater = marks
         return next
     }
 

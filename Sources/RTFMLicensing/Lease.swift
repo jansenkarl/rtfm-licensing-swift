@@ -47,17 +47,36 @@ public struct LeaseExpectations: Equatable, Sendable {
 }
 
 /// The highest values already accepted; a lease below them is a replay or a rollback and is refused.
+///
+/// The server numbers each activation's leases, each license's revocation epoch and each trial's leases
+/// separately, so each mark applies to the activation, license or trial it was seen for. A mark with no recorded
+/// scope (state saved by an earlier SDK build) applies to every lease of its kind.
 public struct HighWater: Codable, Equatable, Sendable {
+    /// Paid lease sequence, for `activationID`.
     public var sequence: Int64 = 0
+    /// Revocation epoch, for `licenseID`.
     public var revocationEpoch: Int64 = 0
+    /// Trial lease revision and sequence, for `trialID`.
     public var trialRevision: Int64 = 0
+    public var trialSequence: Int64?
     /// The latest wall-clock time the app has observed, in Unix seconds.
     public var observedTime: Int64 = 0
+    public var activationID: String?
+    public var licenseID: String?
+    public var trialID: String?
 
-    public init(sequence: Int64 = 0, revocationEpoch: Int64 = 0, trialRevision: Int64 = 0, observedTime: Int64 = 0) {
+    public init(sequence: Int64 = 0, revocationEpoch: Int64 = 0, trialRevision: Int64 = 0, trialSequence: Int64? = nil,
+                observedTime: Int64 = 0, activationID: String? = nil, licenseID: String? = nil, trialID: String? = nil) {
         self.sequence = sequence
         self.revocationEpoch = revocationEpoch
         self.trialRevision = trialRevision
+        self.trialSequence = trialSequence
         self.observedTime = observedTime
+        self.activationID = activationID
+        self.licenseID = licenseID
+        self.trialID = trialID
     }
+
+    /// Whether a mark recorded for `recorded` applies to a lease for `id`.
+    static func applies(_ recorded: String?, to id: String) -> Bool { recorded == nil || recorded == id }
 }

@@ -43,12 +43,12 @@ final class StoreTests: XCTestCase {
 
     func testAcceptingALeaseRaisesButNeverLowersHighWater() throws {
         var state = sampleState()
-        state.highWater = HighWater(sequence: 9, revocationEpoch: 3, trialRevision: 2, observedTime: 100)
+        state.highWater = HighWater(sequence: 9, revocationEpoch: 3, trialRevision: 2, observedTime: 100, activationID: "act", licenseID: "lic")
         let lease = Lease(kind: .paid(licenseID: "lic", activationID: "act", revocationEpoch: 5), jws: "new.lease.jws", keyID: "k",
                           sequence: 7, issuedAt: 0, notBefore: 0, refreshAfter: 1, expiresAt: 2, graceUntil: 3, entitlements: [])
         let next = state.accepting(lease).observing(50)
         XCTAssertEqual(next.paidLease, "new.lease.jws")
-        XCTAssertEqual(next.highWater, HighWater(sequence: 9, revocationEpoch: 5, trialRevision: 2, observedTime: 100))
+        XCTAssertEqual(next.highWater, HighWater(sequence: 9, revocationEpoch: 5, trialRevision: 2, observedTime: 100, activationID: "act", licenseID: "lic"))
     }
 
     func testInstallationIdentitySignsChallengeProofs() throws {
