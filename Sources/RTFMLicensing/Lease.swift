@@ -20,6 +20,17 @@ public struct Lease: Equatable, Sendable {
     /// Unix seconds: after `expiresAt`, a network or service failure still allows use until this.
     public let graceUntil: Int64
     public let entitlements: [Entitlement]
+    /// The term of a fixed-term or subscription key; nil for a perpetual key.
+    public var term: Term? = nil
+
+    public struct Term: Equatable, Sendable {
+        public enum Kind: String, Sendable { case fixed, subscription }
+        public let kind: Kind
+        /// The term's end (for a subscription, its renewal date).
+        public let endsAt: Date
+        /// When the key stops working: the end plus the Product Version's grace days.
+        public let accessEndsAt: Date
+    }
 }
 
 /// What a lease must match: the app's own Product Version and installation, and what the app has already seen.

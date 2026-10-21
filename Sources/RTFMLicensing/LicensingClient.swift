@@ -115,3 +115,30 @@ public actor LicensingClient {
         return try api.encode(body)
     }
 }
+
+extension LicensingClient {
+    /// Forgets the paid activation (and its lease) or the trial after the service refused it for good.
+    func forget(activation: Bool, trial: Bool) throws {
+        var next = try state()
+        if activation { next.activation = nil; next.paidLease = nil }
+        if trial { next.trialLease = nil; next.trialID = nil; next.trialRefreshCredential = nil }
+        try commit(next)
+    }
+
+    /// The stored lease's quiet-refresh time, read from the lease as stored (it was verified when accepted).
+    func refreshAfter(_ kind: LeaseVerifier.Expected) throws -> Int64? {
+        let state = try state()
+        guard let jws = kind == .paid ? state.paidLease : state.trialLease,
+              let payload = jws.split(separator: ".").dropFirst().first.flatMap({ Base64URL.decode(String($0)) }),
+              let claims = (try? JSONValue.parse(payload))?.objectValue else { return nil }
+        return claims["refresh_after"]?.safeInteger
+    }
+
+    func currentStatus(network: AccessTiming.Network) throws -> LicenseStatus {
+        StatusEvaluator.evaluate(try state(), integration: integration, now: unixNow, network: network)
+    }
+
+    func recordObservedTime() throws {
+        try commit(try state().observing(unixNow))
+    }
+}
