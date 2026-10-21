@@ -65,6 +65,8 @@ struct EnterKeyView: View {
 | `.checking` | Before `start()` finishes. |
 
 Offer **Deactivate** (`license.deactivate()`) so a customer can move their key to another Mac.
+`license.checkNow()` renews the lease immediately, for a "Check now" button; `start()` renews only when the lease
+is due.
 
 ## Try it from Terminal
 

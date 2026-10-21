@@ -38,6 +38,15 @@ public final class RTFMLicense: ObservableObject {
     /// Finishes any request left pending, renews the lease quietly once it is due, and updates `status`.
     /// Never blocks offline use: without a network the stored lease decides, including its grace period.
     public func start() async {
+        await check(force: false)
+    }
+
+    /// Renews the lease now, whether or not it is due, for a "Check now" button. Offline, the stored lease decides.
+    public func checkNow() async {
+        await check(force: true)
+    }
+
+    private func check(force: Bool) async {
         var network = AccessTiming.Network.notChecked
         var refusal: NotLicensedReason?
         do {
@@ -47,7 +56,7 @@ public final class RTFMLicense: ObservableObject {
         } catch {}
         let now = await client.unixNow
         for kind in [LeaseVerifier.Expected.paid, .trial] {
-            guard let due = try? await client.refreshAfter(kind), now >= due, network != .unavailable else { continue }
+            guard let due = try? await client.refreshAfter(kind), force || now >= due, network != .unavailable else { continue }
             do {
                 _ = kind == .paid ? try await client.refresh() : try await client.refreshTrial()
                 network = .available
