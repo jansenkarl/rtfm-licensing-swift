@@ -7,6 +7,8 @@ public actor LicensingClient {
     let api: LicensingAPI
     let store: LicenseStore
     let now: @Sendable () -> Date
+    /// The state as last read or committed, so the Keychain is read once per launch rather than at every step.
+    private var cached: LicenseState?
 
     public init(integration: AppIntegration, store: LicenseStore, appVersion: String,
                 transport: HTTPTransport = URLSessionTransport(), now: @escaping @Sendable () -> Date = { Date() }) {
@@ -22,8 +24,10 @@ public actor LicensingClient {
 
     /// The stored state, creating the installation identity on first use.
     public func state() throws -> LicenseState {
+        if let cached { return cached }
         let stored: LicenseState?
         do { stored = try store.load() } catch { throw LicensingError.storage("\(error)") }
+        cached = stored
         if let stored { return stored }
         let fresh = LicenseState(installationKey: InstallationIdentity.generate().rawRepresentation)
         try commit(fresh)
@@ -32,6 +36,7 @@ public actor LicensingClient {
 
     func commit(_ state: LicenseState) throws {
         do { try store.commit(state) } catch { throw LicensingError.storage("\(error)") }
+        cached = state
     }
 
     func identity(_ state: LicenseState) throws -> InstallationIdentity {
