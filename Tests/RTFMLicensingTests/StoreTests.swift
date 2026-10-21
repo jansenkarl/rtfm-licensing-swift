@@ -12,7 +12,7 @@ final class StoreTests: XCTestCase {
         state.paidLease = "a.b.c"
         state.highWater = HighWater(sequence: 4, revocationEpoch: 1, observedTime: 1_785_499_200)
         state.manifestRefetches = ["kid-2": Date(timeIntervalSince1970: 1_785_499_200)]
-        state.pendingOperation = .init(path: "/v1/activations", body: Data("{}".utf8), idempotencyKey: "idem-1")
+        state.pendingOperation = .init(operation: .activate, path: "/v1/activations", body: Data("{}".utf8), idempotencyKey: "idem-1")
         return state
     }
 

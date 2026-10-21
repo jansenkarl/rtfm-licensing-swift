@@ -15,4 +15,7 @@ signed leases, renewal, deactivation and trials.
   against the licensing server's shared conformance fixtures and its server-signed golden leases.
 - **M2, storage (done):** the whole license state is one Keychain item, replaced atomically on each commit; the
   installation's own P-256 key; high-water marks that only rise.
-- Next: the online client (M3), the public API and a sample app (M5).
+- **M3, online client (done):** challenges, activation, refresh, deactivation, trial start and refresh. Each request
+  is written down before it is sent and replayed exactly after a lost response or a failed save, so a seat is never
+  spent twice. Network and service failures allow grace; refusals are typed.
+- Next: the public API and a sample app (M5), then acceptance on staging (M6).
