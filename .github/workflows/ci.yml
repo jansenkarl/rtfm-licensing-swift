@@ -21,4 +21,6 @@ jobs:
       - name: Swift version
         run: swift --version
       - name: Test
+        env:
+          RTFM_KEYCHAIN_TESTS: "1"
         run: swift test
