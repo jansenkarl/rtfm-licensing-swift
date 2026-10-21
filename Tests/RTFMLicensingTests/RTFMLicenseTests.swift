@@ -110,6 +110,18 @@ final class RTFMLicenseTests: XCTestCase {
         XCTAssertEqual(server.seatsUsed, 0)
     }
 
+    func testCheckNowRenewsBeforeTheLeaseIsDue() async throws {
+        try await license.activate(productKey: "SYNTH-GOOD-KEY")
+        at(server.now + 3600)
+        await license.start()
+        guard case let .licensed(notDue) = license.status else { return XCTFail("\(license.status)") }
+        XCTAssertEqual(notDue.issuedAt.timeIntervalSince1970, TimeInterval(server.now - 3600), "start() does not renew early")
+        await license.checkNow()
+        guard case let .licensed(renewed) = license.status else { return XCTFail("\(license.status)") }
+        XCTAssertEqual(renewed.issuedAt.timeIntervalSince1970, TimeInterval(server.now))
+        XCTAssertEqual(try store.load()?.highWater.sequence, 2)
+    }
+
     func testMalformedTermIsRefused() {
         XCTAssertThrowsError(try LeaseVerifier.term(.object(["type": .string("monthly")])))
         XCTAssertNil(try LeaseVerifier.term(nil))

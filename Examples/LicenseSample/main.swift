@@ -8,6 +8,7 @@ let usage = """
 Usage: rtfm-license-sample <app-integration.json> <command>
   status        Check the stored license (renews it quietly when due) and print the status.
   activate      Activate a product key on this Mac (the key is read without being shown).
+  renew         Renew the lease now, even if it is not due, and print the status.
   deactivate    Release this Mac's seat.
   trial         Start or resume a trial.
   reset         Forget the license stored on this Mac (does not release the seat).
@@ -27,6 +28,7 @@ func run() async -> Int32 {
         print("\(integration.productCode) / \(integration.productVersionCode) on \(integration.issuer)")
         switch command {
         case "status": await license.start()
+        case "renew": await license.checkNow()
         case "activate":
             guard let key = getpass("Product key (not shown): ").map({ String(cString: $0) }), !key.isEmpty else { return 2 }
             try await license.activate(productKey: key)
@@ -57,7 +59,7 @@ func describe(_ status: LicenseStatus) -> String {
     switch status {
     case .checking: return "Checking…"
     case let .licensed(info):
-        var lines = ["Licensed (license \(info.licenseID))"]
+        var lines = ["Licensed (license \(info.licenseID)), lease issued \(date(info.issuedAt))"]
         if let term = info.term {
             lines.append(term.kind == .subscription ? "Renews \(date(term.endsAt)) · works until \(date(term.accessEndsAt))"
                                                     : "Ends \(date(term.endsAt)) · works until \(date(term.accessEndsAt))")

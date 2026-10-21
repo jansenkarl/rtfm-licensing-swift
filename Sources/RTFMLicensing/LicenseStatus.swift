@@ -24,6 +24,8 @@ public struct LicenseInfo: Equatable, Sendable {
     /// The lease expired and the licensing service could not be reached; use continues until `graceUntil`.
     public let inGrace: Bool
     public let graceUntil: Date
+    /// When the current lease was issued: the last time the licensing service confirmed this key.
+    public let issuedAt: Date
 
     public func entitlement(_ code: String) -> Entitlement.Value? { entitlements.first { $0.code == code }?.value }
 }
@@ -73,7 +75,8 @@ enum StatusEvaluator {
                 switch AccessTiming.decide(lease, now: now, observedTime: observed, network: network) {
                 case .valid, .grace:
                     return .licensed(LicenseInfo(licenseID: licenseID, entitlements: lease.entitlements, term: lease.term,
-                                                 inGrace: now > lease.expiresAt, graceUntil: Date(timeIntervalSince1970: TimeInterval(lease.graceUntil))))
+                                                 inGrace: now > lease.expiresAt, graceUntil: Date(timeIntervalSince1970: TimeInterval(lease.graceUntil)),
+                                                 issuedAt: Date(timeIntervalSince1970: TimeInterval(lease.issuedAt))))
                 case .clockRolledBack, .notYetValid: return .notLicensed(.clockRolledBack)
                 default: paidReason = .expired
                 }
