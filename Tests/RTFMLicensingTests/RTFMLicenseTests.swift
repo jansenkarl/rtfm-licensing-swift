@@ -127,3 +127,30 @@ final class RTFMLicenseTests: XCTestCase {
         XCTAssertNil(try LeaseVerifier.term(nil))
     }
 }
+
+/// Counts reads, to keep Keychain access (and any access prompt) to one read per launch.
+final class CountingStore: LicenseStore, @unchecked Sendable {
+    let inner = MemoryLicenseStore()
+    let lock = NSLock()
+    var loads = 0
+    func load() throws -> LicenseState? { lock.withLock { loads += 1 }; return try inner.load() }
+    func commit(_ state: LicenseState) throws { try inner.commit(state) }
+    func erase() throws { try inner.erase() }
+}
+
+@MainActor
+final class StoreAccessTests: XCTestCase {
+    func testOneLaunchReadsTheStoreOnce() async throws {
+        let server = FakeLicensingServer()
+        let store = CountingStore()
+        let now = Date(timeIntervalSince1970: TimeInterval(server.now))
+        let first = RTFMLicense(integration: server.integration, store: store, appVersion: "1.0", transport: server, now: { now })
+        try await first.activate(productKey: "SYNTH-GOOD-KEY")
+        await first.checkNow()
+        XCTAssertEqual(store.loads, 1)
+        let relaunched = RTFMLicense(integration: server.integration, store: store, appVersion: "1.0", transport: server, now: { now })
+        await relaunched.checkNow()
+        XCTAssertEqual(store.loads, 2)
+        XCTAssertTrue(relaunched.status.allowsUse)
+    }
+}
