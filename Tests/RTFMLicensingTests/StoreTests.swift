@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import Security
 import XCTest
 @testable import RTFMLicensing
 
@@ -72,6 +73,10 @@ final class StoreTests: XCTestCase {
         next.highWater.sequence = 10
         try store.commit(next)
         XCTAssertEqual(try store.load(), next)
+        // An updated build that may not delete the item leaves the one-byte marker, which reads as nothing stored.
+        let query = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: store.service, kSecAttrAccount as String: store.account]
+        XCTAssertEqual(SecItemUpdate(query as CFDictionary, [kSecValueData as String: KeychainLicenseStore.erasedMarker] as CFDictionary), errSecSuccess)
+        XCTAssertNil(try store.load())
         try store.erase()
         XCTAssertNil(try store.load())
     }
