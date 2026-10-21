@@ -23,12 +23,17 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
     private var challenges: [String: (nonce: String, thumbprint: String, used: Bool)] = [:]
     private var replays: [String: Data] = [:]
     private var credentials: [String: String] = [:]
-    let now: Int64 = 1_785_499_200
+    var now: Int64 = 1_785_499_200
+    /// Every request fails as if the Mac were offline.
+    var offline = false
+    /// Signed into paid leases as the `term` claim when set.
+    var term: [String: Any]?
 
     var integration: AppIntegration { try! syntheticIntegration(root: root.publicJWK) }
 
     func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         try lock.withLock {
+            if offline { throw URLError(.notConnectedToInternet) }
             let path = request.url!.path
             let body = request.httpBody.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] } ?? [:]
             let (status, object) = try handle(path, body, key: request.value(forHTTPHeaderField: "Idempotency-Key"))
@@ -120,6 +125,7 @@ final class FakeLicensingServer: HTTPTransport, @unchecked Sendable {
     private func paidLease(_ activation: String, _ device: String) throws -> String {
         var payload = claims(device)
         payload.merge(["schema": "rtfm.license-lease.v1", "license_id": "lic_1", "activation_id": activation, "revocation_epoch": 0]) { $1 }
+        if let term { payload["term"] = term }
         return try leaseSigners[activeKid]!.sign(kid: activeKid, type: "rtfm.license-lease.v1+jws", payload: payload)
     }
 

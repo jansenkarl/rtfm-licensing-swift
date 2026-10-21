@@ -9,6 +9,8 @@ let package = Package(
     ],
     targets: [
         .target(name: "RTFMLicensing"),
+        // A command-line sample: `swift run rtfm-license-sample <app-integration.json> status`.
+        .executableTarget(name: "rtfm-license-sample", dependencies: ["RTFMLicensing"], path: "Examples/LicenseSample"),
         .testTarget(name: "RTFMLicensingTests", dependencies: ["RTFMLicensing"], resources: [.copy("Fixtures")]),
     ]
 )

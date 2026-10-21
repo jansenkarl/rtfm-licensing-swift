@@ -79,6 +79,18 @@ public enum LeaseVerifier {
         }
         return Lease(kind: kind, jws: jws, keyID: kid, sequence: sequence, issuedAt: issuedAt, notBefore: notBefore,
                      refreshAfter: refreshAfter, expiresAt: expiresAt, graceUntil: graceUntil,
-                     entitlements: try Entitlement.parseList(claims["entitlements"], typed: typed))
+                     entitlements: try Entitlement.parseList(claims["entitlements"], typed: typed),
+                     term: try term(claims["term"]))
+    }
+
+    /// The optional `term` claim of a fixed-term or subscription key.
+    static func term(_ value: JSONValue?) throws -> Lease.Term? {
+        guard let value else { return nil }
+        guard let object = value.objectValue, let kind = object["type"]?.stringValue.flatMap(Lease.Term.Kind.init),
+              let endsAt = object["ends_at"]?.stringValue.flatMap(Timestamp.parse),
+              let accessEndsAt = object["access_ends_at"]?.stringValue.flatMap(Timestamp.parse), accessEndsAt >= endsAt else {
+            throw VerificationError.malformed("lease term")
+        }
+        return Lease.Term(kind: kind, endsAt: endsAt, accessEndsAt: accessEndsAt)
     }
 }
