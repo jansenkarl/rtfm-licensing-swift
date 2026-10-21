@@ -25,10 +25,18 @@ public struct LicenseState: Codable, Equatable, Sendable {
 
     /// Endpoint, exact body and idempotency key of a request that may already have reached the server.
     public struct PendingOperation: Codable, Equatable, Sendable {
+        public var operation: Operation
         public var path: String
         public var body: Data
         public var idempotencyKey: String
     }
+
+    public enum Operation: String, Codable, Sendable {
+        case activate, refresh, deactivate, startTrial, refreshTrial
+    }
+
+    /// The trial's refresh credential, from trial start (and replaced if a refresh returns a new one).
+    public var trialRefreshCredential: String?
 
     public init(installationKey: Data) {
         self.installationKey = installationKey
