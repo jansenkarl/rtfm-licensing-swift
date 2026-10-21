@@ -9,6 +9,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "RTFMLicensing"),
-        .testTarget(name: "RTFMLicensingTests", dependencies: ["RTFMLicensing"]),
+        .testTarget(name: "RTFMLicensingTests", dependencies: ["RTFMLicensing"], resources: [.copy("Fixtures")]),
     ]
 )

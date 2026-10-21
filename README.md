@@ -7,3 +7,10 @@ signed leases, renewal, deactivation and trials.
 
 - Requires macOS 13 or later and Swift 5.9 or later.
 - No hardware fingerprinting: each installation has its own key in the app's Keychain.
+
+## Status
+
+- **M1, verification core (done):** App integration file, root-signed Product manifest, paid and trial leases (signature,
+  scope, high-water marks, typed entitlements), expiry and network grace, and the signing-key rotation rule. Tested
+  against the licensing server's shared conformance fixtures and its server-signed golden leases.
+- Next: Keychain storage (M2), the online client (M3), the public API and a sample app (M5).
