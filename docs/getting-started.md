@@ -3,8 +3,8 @@
 This guide takes a macOS app from no licensing to selling keys: set up the product in the RTFM License Manager, add
 the package, gate the app, test with a real key, then ship.
 
-Using an AI coding assistant? Give it [the AI integration guide](ai-integration-guide.md) and your App integration
-file; the prompt is at the end of this page.
+Using an AI coding assistant? Add your App integration file to the project and give the assistant the prompt from
+**Copy AI prompt** in the License Manager; see [the end of this page](#using-an-ai-assistant).
 
 ## 1. Set up your product in the License Manager
 
@@ -228,7 +228,12 @@ when you're done.
 
 ## Using an AI assistant
 
-Give your assistant this prompt, with your App integration file in the project:
+Add your App integration file to the project first. Then, in the License Manager's **App integration** window,
+choose **Copy AI prompt** and paste it into your assistant. The prompt names this package and
+[the AI integration guide](ai-integration-guide.md), and describes your version: its IDs, trial length, seats per
+key and the custom fields the app can read.
+
+Without the License Manager at hand, this general prompt works too:
 
 ```text
 Add RTFM licensing to this macOS app with the Swift package

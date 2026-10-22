@@ -78,7 +78,9 @@ The full walkthrough, with a settings view showing the license and a **Deactivat
 
 ## Using an AI coding assistant
 
-Put your App integration file in the project and give the assistant this prompt:
+Put your App integration file in the project. Then, in the License Manager's **App integration** window, choose
+**Copy AI prompt** and paste it into your assistant: it names this package, the integration guide, and your
+version's trial, seats and custom fields. Or give the assistant this general prompt:
 
 ```text
 Add RTFM licensing to this macOS app with the Swift package
