@@ -3,7 +3,7 @@
 Swift package for adding RTFM License Manager licensing to a macOS app: product key activation, offline use with
 signed leases, quiet renewal, deactivation, trials, and fixed-term or subscription keys.
 
-**Private preview. Not released and not supported yet.**
+**Version 0.1.0, private preview.** MIT licensed (see `LICENSE`). Changes are listed in `CHANGELOG.md`.
 
 - macOS 13 or later, Swift 5.9 or later. No dependencies beyond Apple's CryptoKit and Security frameworks.
 - No hardware fingerprinting: each installation has its own key in the app's Keychain.
@@ -13,7 +13,8 @@ signed leases, quiet renewal, deactivation, trials, and fixed-term or subscripti
 
 1. In the License Manager, open your Product Version and choose **App integration**, then download the file. Add it
    to your app target as `app-integration.json`. It holds only public values.
-2. In Xcode, choose **File → Add Package Dependencies…** and add this repository.
+2. In Xcode, choose **File → Add Package Dependencies…**, add this repository, and choose "Up to Next Minor Version"
+   from 0.1.0.
 3. Create one `RTFMLicense` for the app, check it at launch, and ask for a key when it doesn't allow use:
 
 ```swift
@@ -92,9 +93,6 @@ swift run rtfm-license-sample ~/Downloads/app-integration-my-app-1-staging.json 
 
 ## Status
 
-- **M1, verification core:** manifests, paid and trial leases, entitlements, timing and grace, key rotation. Tested
-  with the licensing server's shared conformance fixtures and its server-signed golden leases.
-- **M2, storage:** Keychain state, replaced atomically; high-water marks that only rise.
-- **M3, online client:** challenges, activation, refresh, deactivation and trials, with requests journaled and replayed.
-- **M5, public API:** `RTFMLicense`, `LicenseStatus`, the term of fixed-term and subscription keys, and the sample tool.
-- Next: acceptance against the staging service (M6), then release 0.1.0 (M7).
+0.1.0 was tested against the RTFM licensing staging service: activation of a fixed-term key, status at launch,
+renewal, deactivation, reactivation, a refused key and a trial. Builds signed with Developer ID read and update their
+Keychain item after an app update without prompts.
