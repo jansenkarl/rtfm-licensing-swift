@@ -3,7 +3,11 @@
 Swift package for adding RTFM License Manager licensing to a macOS app: product key activation, offline use with
 signed leases, quiet renewal, deactivation, trials, and fixed-term or subscription keys.
 
-**Version 0.1.0, private preview.** MIT licensed (see `LICENSE`). Changes are listed in `CHANGELOG.md`.
+**Version 0.1.0.** MIT licensed (see `LICENSE`). Changes are listed in `CHANGELOG.md`.
+
+**Docs:** [Getting started](docs/getting-started.md) · [API reference](docs/reference.md) ·
+[Selling with FastSpring](docs/fastspring.md) · [Troubleshooting](docs/troubleshooting.md) ·
+[AI integration guide](docs/ai-integration-guide.md) ([`llms.txt`](llms.txt))
 
 - macOS 13 or later, Swift 5.9 or later. No dependencies beyond Apple's CryptoKit and Security frameworks.
 - No hardware fingerprinting: each installation has its own key in the app's Keychain.
@@ -68,6 +72,21 @@ struct EnterKeyView: View {
 Offer **Deactivate** (`license.deactivate()`) so a customer can move their key to another Mac.
 `license.checkNow()` renews the lease immediately, for a "Check now" button; `start()` renews only when the lease
 is due.
+
+The full walkthrough, with a settings view showing the license and a **Deactivate this Mac** button, is in
+[Getting started](docs/getting-started.md).
+
+## Using an AI coding assistant
+
+Put your App integration file in the project and give the assistant this prompt:
+
+```text
+Add RTFM licensing to this macOS app with the Swift package
+https://github.com/jansenkarl/rtfm-licensing-swift (from 0.1.0).
+Follow the integration guide exactly:
+https://raw.githubusercontent.com/jansenkarl/rtfm-licensing-swift/main/docs/ai-integration-guide.md
+The App integration file is app-integration.json in the project. Do not change it.
+```
 
 ## Try it from Terminal
 
