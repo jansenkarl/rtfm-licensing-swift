@@ -1,4 +1,4 @@
-# RTFMLicensing
+# RTFM Licensing Swift Package
 
 Swift package for adding RTFM License Manager licensing to a macOS app: product key activation, offline use with
 signed leases, quiet renewal, deactivation, trials, and fixed-term or subscription keys.
