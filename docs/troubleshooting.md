@@ -23,12 +23,16 @@ and download it again from **App integration** if in doubt. The error names the 
 ## `activation_seat_limit_reached`
 
 The key is active on as many Macs as it covers. The customer deactivates it on one of them (your app's
-**Deactivate this Mac**). If the customer no longer has that Mac, you can revoke the key in the License Manager and
-send them a new one.
+**Deactivate this Mac**). If the customer no longer has that Mac, open the key in the License Manager and choose
+**Deactivate** on that Mac's row under Activations. Its seat is free at once, and the customer activates the new Mac
+with the same key. The old Mac stops when it next renews its license (the dialog names the latest date). This does not
+use one of the key's deactivations.
 
 ## `deactivation_limit_reached`
 
-The key has been moved as many times as its version allows. The limit is set with the version's **Edit** action.
+The key has been moved as many times as its version allows. The limit is set with the version's **Edit** action. You
+can still free a Mac yourself with **Deactivate** on the key's page in the License Manager; that does not count
+against the limit.
 
 ## macOS asks for Keychain access
 

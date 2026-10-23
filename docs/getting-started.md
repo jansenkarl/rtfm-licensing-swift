@@ -183,7 +183,8 @@ struct LicenseSettingsView: View {
 ```
 
 **Deactivate** releases this Mac's seat so the key can be activated on another Mac. A version can limit how many
-times a key may be moved; past the limit the service refuses with `deactivation_limit_reached`.
+times a key may be moved; past the limit the service refuses with `deactivation_limit_reached`. When a customer no
+longer has the old Mac, you deactivate it from the key's page in the License Manager instead.
 
 ## 7. Read custom fields
 
