@@ -155,7 +155,10 @@ struct LicenseSettingsView: View {
                         do { try await license.deactivate() } catch { message = describe(error) }
                     }
                 }
+                Text("Do this before you erase or replace this Mac.").font(.caption).foregroundStyle(.secondary)
             }
+            // Your product's self-service page (see below).
+            Link("Lost a Mac? Free it online", destination: URL(string: "https://lm.rtfmdesign.com/deactivate/PRODUCT-CODE")!)
             if !message.isEmpty { Text(message).foregroundStyle(.secondary) }
         }
         .padding()
@@ -184,7 +187,11 @@ struct LicenseSettingsView: View {
 
 **Deactivate** releases this Mac's seat so the key can be activated on another Mac. A version can limit how many
 times a key may be moved; past the limit the service refuses with `deactivation_limit_reached`. When a customer no
-longer has the old Mac, you deactivate it from the key's page in the License Manager instead.
+longer has the old Mac (erased, replaced or lost without deactivating), they free it themselves on the License
+Manager's self-service page, `https://lm.rtfmdesign.com/deactivate/<product code>`: they enter the key, see its Macs
+and free one, which counts against the key's deactivation limit. You can also deactivate it from the key's page in the
+License Manager, which doesn't count. A Mac that hasn't checked in for 120 days (a version setting) is freed
+automatically. The page and the 120 days can be turned off per version in Edit version.
 
 ## 7. Read custom fields
 
