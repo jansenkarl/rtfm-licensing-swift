@@ -31,7 +31,9 @@ You don't need a product key to write the code. The developer tests with their o
   not put product keys in code, tests, previews or sample data.
 - Show `LicensingError.refused`'s `message` to the customer as it is: it is written for customers. Show a fixed
   "couldn't reach the licensing service" message for `.network` and `.service`.
-- Always give the customer a way to **deactivate** (move the key to another Mac).
+- Always give the customer a way to **deactivate** (move the key to another Mac), with "Do this before you erase or
+  replace this Mac." under the button. If the developer's prompt gives the address of the License Manager's
+  self-service page, add a "Lost a Mac? Free it online" link to it beside the button; otherwise leave the link out.
 - Do not edit `app-integration.json`, and do not add the package's sample tool to the app.
 
 ## Step 1. Add the package
@@ -114,7 +116,10 @@ struct LicenseSettingsView: View {
                         do { try await license.deactivate() } catch { message = describe(error) }
                     }
                 }
+                Text("Do this before you erase or replace this Mac.").font(.caption).foregroundStyle(.secondary)
             }
+            // The self-service page's address from the developer's prompt; leave this out if it gave none.
+            Link("Lost a Mac? Free it online", destination: URL(string: "https://lm.rtfmdesign.com/deactivate/PRODUCT-CODE")!)
             if !message.isEmpty { Text(message).foregroundStyle(.secondary) }
         }
         .padding()

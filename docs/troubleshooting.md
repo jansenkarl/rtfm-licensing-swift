@@ -23,7 +23,8 @@ and download it again from **App integration** if in doubt. The error names the 
 ## `activation_seat_limit_reached`
 
 The key is active on as many Macs as it covers. The customer deactivates it on one of them (your app's
-**Deactivate this Mac**). If the customer no longer has that Mac, open the key in the License Manager and choose
+**Deactivate this Mac**). If the customer no longer has that Mac, they can free it on the self-service page, which the
+refusal message names (`https://lm.rtfmdesign.com/deactivate/<product code>`). Or open the key in the License Manager and choose
 **Deactivate** on that Mac's row under Activations. Its seat is free at once, and the customer activates the new Mac
 with the same key. The old Mac stops when it next renews its license (the dialog names the latest date). This does not
 use one of the key's deactivations.

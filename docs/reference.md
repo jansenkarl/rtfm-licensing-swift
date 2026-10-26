@@ -106,7 +106,7 @@ period. A refusal never does.
 | Code | When |
 |---|---|
 | `invalid_product_key` | The key is mistyped, revoked or inactive, is for another product or version than the App integration file names, or that version is not enabled. |
-| `activation_seat_limit_reached` | The key is active on as many Macs as it covers. The customer deactivates one of them first. |
+| `activation_seat_limit_reached` | The key is active on as many Macs as it covers. The customer deactivates one of them first, in the app or on the self-service page the message names. |
 | `deactivation_limit_reached` | The key has been moved as many times as its version allows. |
 | `license_term_ended` | The fixed term or subscription has ended. |
 | `invalid_activation_credentials` | At renewal or deactivation: this Mac's activation was deactivated elsewhere or the key was revoked. |
